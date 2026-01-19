@@ -94,50 +94,69 @@ struct ScreenshotDetailView: View {
     let item: ScreenshotItem
     let highlightTerm: String
     
+    @State private var isRedactionEnabled = true
+    
     var body: some View {
         HSplitView {
             if let data = item.imageData, let nsImage = NSImage(data: data) {
-                // Assumes you have ImageWithHighlights in a separate file
-                ImageWithHighlights(nsImage: nsImage, highlightTerm: highlightTerm)
-                    .background(Color(nsColor: .windowBackgroundColor))
+                ImageWithHighlights(
+                    nsImage: nsImage,
+                    highlightTerm: highlightTerm,
+                    isRedactionEnabled: isRedactionEnabled
+                )
+                .background(Color(nsColor: .windowBackgroundColor))
             } else {
                 Text("Image Missing")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             
             VStack(alignment: .leading) {
-                if let urlString = item.url, let url = URL(string: urlString) {
-                    Link(destination: url) {
-                        HStack {
-                            Image(systemName: "safari")
-                                .font(.system(size: 14))
-                            
-                            VStack(alignment: .leading) {
-                                Text("Open in Browser")
-                                    .font(.caption)
-                                    .fontWeight(.bold)
+                HStack {
+                    if let urlString = item.url, let url = URL(string: urlString) {
+                        Link(destination: url) {
+                            HStack {
+                                Image(systemName: "safari")
+                                    .font(.system(size: 14))
                                 
-                                Text(url.host() ?? urlString)
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-                                    .lineLimit(1)
-                                    .truncationMode(.middle)
+                                VStack(alignment: .leading) {
+                                    Text("Open in Browser")
+                                        .font(.caption)
+                                        .fontWeight(.bold)
+                                    
+                                    Text(url.host() ?? urlString)
+                                        .font(.caption2)
+                                        .foregroundStyle(.secondary)
+                                        .lineLimit(1)
+                                        .truncationMode(.middle)
+                                }
+                                Spacer()
+                                Image(systemName: "arrow.up.right")
+                                    .font(.caption)
                             }
-                            Spacer()
-                            Image(systemName: "arrow.up.right")
-                                .font(.caption)
+                            .padding(8)
+                            .background(Color(nsColor: .controlBackgroundColor))
+                            .cornerRadius(8)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
+                            )
                         }
-                        .padding(8)
-                        .background(Color(nsColor: .controlBackgroundColor))
-                        .cornerRadius(8)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
-                        )
+                        .buttonStyle(.plain)
+                    }
+                    
+                    Spacer()
+                    
+                    Button(action: { isRedactionEnabled.toggle() }) {
+                        Image(systemName: isRedactionEnabled ? "eye.slash.fill" : "eye.fill")
+                            .foregroundStyle(isRedactionEnabled ? .green : .secondary)
+                            .padding(6)
+                            .background(isRedactionEnabled ? Color.green.opacity(0.1) : Color.clear)
+                            .clipShape(Circle())
                     }
                     .buttonStyle(.plain)
-                    .padding([.top, .horizontal])
+                    .help("Toggle Smart Redaction")
                 }
+                .padding([.top, .horizontal])
                 
                 Text("DETECTED TEXT")
                     .font(.caption)
