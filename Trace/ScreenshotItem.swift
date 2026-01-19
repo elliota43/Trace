@@ -14,6 +14,7 @@ final class ScreenshotItem: Identifiable {
     var id: UUID
     var timestamp: Date
     var appName: String
+    var smartTitle: String
     var recognizedText: String
     var url: String?
     
@@ -26,5 +27,7 @@ final class ScreenshotItem: Identifiable {
         self.recognizedText = text
         self.imageData = imageData
         self.url = url
+        
+        self.smartTitle = SmartNamer.generateTitle(from: text, appName: appName)
     }
 }
