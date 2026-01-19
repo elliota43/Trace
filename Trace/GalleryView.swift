@@ -96,14 +96,34 @@ struct ScreenshotDetailView: View {
                     Link(destination: url) {
                         HStack {
                             Image(systemName: "safari")
-                            Text("Open Original Page")
+                                .font(.system(size: 14))
+                            
+                            VStack(alignment: .leading) {
+                                Text("Open in Browser")
+                                    .font(.caption)
+                                    .fontWeight(.bold)
+                                
+                                Text(url.host() ?? urlString)
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(1)
+                                    .truncationMode(.middle)
+                            }
+                            Spacer()
+                            
+                            Image(systemName: "arrow.up.right")
+                                .font(.caption)
                         }
-                        .frame(maxWidth: .infinity)
-                        .padding(0)
-                        .background(Color.blue.opacity(0.1))
+                        .padding(8)
+                        .background(Color(nsColor: .controlBackgroundColor))
                         .cornerRadius(8)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
+                        )
                     }
-                    .padding()
+                    .buttonStyle(.plain)
+                    .padding(.horizontal)
                 }
                 
                 
