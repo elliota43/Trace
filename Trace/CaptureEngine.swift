@@ -18,9 +18,9 @@ class CaptureEngine: ObservableObject {
     @Published var isCapturing = false
     private let logger = Logger()
     
-    func capture() async -> (imageData: Data, text: String, appName: String)? {
+    func capture() async -> (imageData: Data, text: String, appName: String, url: String?)? {
         isCapturing = true
-        defer { isCapturing = false }
+        defer { isCapturing = false}
         
         do {
             guard PermissionsManager.checkScreenRecordingPermission() else {
@@ -35,6 +35,13 @@ class CaptureEngine: ObservableObject {
             var activeAppName = "Unknown"
             if let frontApp = NSWorkspace.shared.frontmostApplication {
                 activeAppName = frontApp.localizedName ?? "Unknown"
+            }
+            
+            let detectedUrl = await MainActor.run {
+                return BrowserIntegration.getCurrentURL(for: activeAppName)
+            }
+            if let url = detectedUrl {
+                print("Captured Link: \(url)")
             }
             
             // Capture
@@ -58,7 +65,7 @@ class CaptureEngine: ObservableObject {
             }
             
             print("✅ Captured: \(activeAppName)")
-            return (pngData, extractedText, activeAppName)
+            return (pngData, extractedText, activeAppName, detectedUrl)
             
         } catch {
             logger.error("Capture failed: \(error.localizedDescription)")
